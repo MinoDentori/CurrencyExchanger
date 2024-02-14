@@ -5,38 +5,56 @@
     <string name="to">To</string>
     <string name="amount">Amount</string>
     <string name="convert">Convert</string>
+    <string name="done">Done</string>
+    <string name="currency_converted">Currency Converted</string>
     <string-array name="currency_codes">
-        <item>EUR</item>
-        <item>CAD</item>
-        <item>HKD</item>
-        <item>ISK</item>
-        <item>PHP</item>
-        <item>DKK</item>
-        <item>HUF</item>
-        <item>CZK</item>
+        <item>AED</item>
+        <item>AFN</item>
+        <item>ALL</item>
+        <item>AMD</item>
+        <item>ANG</item>
+        <item>AOA</item>
+        <item>ARS</item>
         <item>AUD</item>
-        <item>RON</item>
-        <item>SEK</item>
-        <item>IDR</item>
-        <item>INR</item>
-        <item>BRL</item>
-        <item>RUB</item>
-        <item>HRK</item>
-        <item>JPY</item>
-        <item>THB</item>
-        <item>CHF</item>
-        <item>SGD</item>
-        <item>PLN</item>
+        <item>AWG</item>
+        <item>AZN</item>
+        <item>BAM</item>
+        <item>BBD</item>
+        <item>BDT</item>
         <item>BGN</item>
+        <item>BHD</item>
+        <item>BIF</item>
+        <item>BMD</item>
+        <item>BND</item>
+        <item>BOB</item>
+        <item>BRL</item>
+        <item>BSD</item>
+        <item>BTC</item>
+        <item>BTN</item>
+        <item>BWP</item>
+        <item>BYN</item>
+        <item>BYR</item>
+        <item>BZD</item>
+        <item>CAD</item>
+        <item>CDF</item>
+        <item>CHF</item>
+        <item>CLF</item>
+        <item>CLP</item>
         <item>CNY</item>
-        <item>NOK</item>
-        <item>NZD</item>
-        <item>ZAR</item>
-        <item>USD</item>
-        <item>MXN</item>
-        <item>ILS</item>
-        <item>GBP</item>
-        <item>KRW</item>
-        <item>MYR</item>
+        <item>COP</item>
+        <item>CRC</item>
+        <item>CUC</item>
+        <item>CUP</item>
+        <item>CVE</item>
+        <item>CZK</item>
+        <item>DJF</item>
+        <item>DKK</item>
+        <item>DOP</item>
+        <item>DZD</item>
+        <item>EGP</item>
+        <item>ERN</item>
+        <item>ETB</item>
+        <item>EUR</item>
+        <!-- Add more currency codes here -->
     </string-array>
 </resources>
