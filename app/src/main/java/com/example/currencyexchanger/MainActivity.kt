@@ -8,8 +8,11 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.currencyexchanger.databinding.ActivityMainBinding
 import com.example.currencyexchanger.main.MainViewModel
+import com.example.currencyexchanger.util.CurrencyBalanceAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -32,6 +35,11 @@ class MainActivity : AppCompatActivity() {
                 binding.spToCurrency.selectedItem.toString()
             )
         }
+
+        val recyclerView: RecyclerView = findViewById(R.id.recyclerViewCurrencies)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        val currencyBalances = viewModel.getCurrencyBalances()
+        recyclerView.adapter = CurrencyBalanceAdapter(currencyBalances)
 
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
