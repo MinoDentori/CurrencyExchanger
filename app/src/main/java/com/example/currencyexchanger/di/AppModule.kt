@@ -3,6 +3,8 @@ package com.example.currencyexchanger.di
 import com.example.currencyexchanger.data.CurrencyApi
 import com.example.currencyexchanger.main.DefaultMainRepository
 import com.example.currencyexchanger.main.MainRepository
+import com.example.currencyexchanger.poller.DefaultPoller
+import com.example.currencyexchanger.poller.Poller
 import com.example.currencyexchanger.util.DispatcherProvider
 import dagger.Module
 import dagger.Provides
@@ -12,11 +14,10 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
 import javax.inject.Singleton
 
 
-private const val BASE_URL = "https://developers.paysera.com/tasks/api"
+private const val BASE_URL = "https://developers.paysera.com/tasks/api/"
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -33,6 +34,12 @@ object AppModule {
     @Singleton
     @Provides
     fun provideMainRepository(api: CurrencyApi): MainRepository = DefaultMainRepository(api)
+
+    @Singleton
+    @Provides
+    fun providePoller(repository: DefaultMainRepository, dispatcher: DispatcherProvider): Poller {
+        return DefaultPoller(repository, dispatcher)
+    }
 
     @Singleton
     @Provides
