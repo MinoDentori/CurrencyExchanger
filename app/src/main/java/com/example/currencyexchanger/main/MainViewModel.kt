@@ -19,7 +19,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.round
 
-private const val NOT_A_VALID_AMOUNT = "Not a valid amount"
 private const val UNEXPECTED_ERROR = "Unexpected error occurred"
 private const val INSUFFICIENT_BALANCE = "Insufficient balance"
 private const val ZERO_AMOUNT = 0.0
@@ -136,7 +135,6 @@ class MainViewModel @Inject constructor(
     }
 
     private fun calculateCommission(amount: Double): Double {
-        // Your commission calculation logic here...
         return 0.0
     }
 
