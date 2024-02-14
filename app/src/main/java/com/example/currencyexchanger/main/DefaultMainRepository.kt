@@ -10,9 +10,9 @@ private const val AN_ERROR_OCCURRED = "An error occurred"
 class DefaultMainRepository @Inject constructor(
     private val api: CurrencyApi
 ) : MainRepository {
-    override suspend fun getRates(base: String): Resource<CurrencyResponse> {
+    override suspend fun getRates(): Resource<CurrencyResponse> {
         return try {
-            val response = api.getRates(base)
+            val response = api.getRates()
             val result = response.body()
             if (response.isSuccessful && result != null) {
                 Resource.Success(result)
