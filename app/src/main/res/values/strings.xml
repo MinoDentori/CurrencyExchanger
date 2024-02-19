@@ -8,6 +8,7 @@
     <string name="done">Done</string>
     <string name="currency_converted">Currency Converted</string>
     <string-array name="currency_codes">
+        <item>EUR</item>
         <item>AED</item>
         <item>AFN</item>
         <item>ALL</item>
@@ -54,7 +55,5 @@
         <item>EGP</item>
         <item>ERN</item>
         <item>ETB</item>
-        <item>EUR</item>
-        <!-- Add more currency codes here -->
     </string-array>
 </resources>
