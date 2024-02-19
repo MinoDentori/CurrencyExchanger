@@ -12,6 +12,7 @@ class User(
 ) {
     init {
         initializeBalances()
+        println(balances)
     }
 
     private fun initializeBalances() {
@@ -22,21 +23,26 @@ class User(
             }
         }
         balances[UserConstants.DEFAULT_CURRENCY] = UserConstants.INITIAL_BALANCE
+
+
     }
 
-    fun updateBalance(amount: Double, currency: String): Boolean {
-        return balances[currency]?.let { balance ->
-            if (balance >= amount) {
-                balances[currency] = balance - amount
-                true
-            } else {
-                false
-            }
-        } ?: false
+    fun updateBalance(amount: Double?, currency: String) {
+        amount?.let { updatedAmount ->
+            balances[currency] = updatedAmount
+        }
     }
 
     fun getBalance(currency: String): Double? {
         return balances[currency]
+    }
+
+    fun getNumberOfOperations(): Int {
+        return numberOfOperations
+    }
+
+    fun incrementNumberOfOperations() {
+        numberOfOperations++
     }
 
     fun getCurrencyBalances(): List<CurrencyBalance> {
@@ -45,9 +51,5 @@ class User(
             currencyBalances.add(CurrencyBalance(currency, balance))
         }
         return currencyBalances
-    }
-
-    private fun incrementNumberOfOperations(operations: Int) {
-        numberOfOperations += operations
     }
 }

@@ -2,7 +2,11 @@ package com.example.currencyexchanger
 
 import android.graphics.Color
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.widget.Button
+import android.widget.TextView
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
@@ -37,9 +41,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         val recyclerView: RecyclerView = findViewById(R.id.recyclerViewCurrencies)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        val currencyBalances = viewModel.getCurrencyBalances()
-        recyclerView.adapter = CurrencyBalanceAdapter(currencyBalances)
+        recyclerView.layoutManager = LinearLayoutManager(
+            this, LinearLayoutManager.HORIZONTAL, false)
+        val currencyBalanceAdapter = CurrencyBalanceAdapter(emptyList())
+        recyclerView.adapter = currencyBalanceAdapter
+
+        viewModel.currencyBalances.observe(this) { currencyBalances ->
+            currencyBalanceAdapter.updateData(currencyBalances)
+        }
 
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -58,10 +67,32 @@ class MainActivity : AppCompatActivity() {
                         is  MainViewModel.CurrencyEvent.Loading -> {
                             binding.progressBar.isVisible = true
 
-                        } else -> Unit
+                        }
+                        is MainViewModel.CurrencyEvent.ShowDialog -> {
+                            showDialog(event.message)
+                        }
+                        else -> Unit
                     }
                 }
             }
         }
+    }
+    private fun showDialog(message: String) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_currency_converted, null)
+        val tvMessage = dialogView.findViewById<TextView>(R.id.text_content)
+        val btnOk = dialogView.findViewById<Button>(R.id.btn_done)
+
+        tvMessage.text = message
+
+        val alertDialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+
+        btnOk.setOnClickListener {
+            alertDialog.dismiss()
+        }
+
+        alertDialog.show()
     }
 }

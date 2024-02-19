@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.currencyexchanger.commission.FixedPercentageCommissionCalculator
 import com.example.currencyexchanger.models.CurrencyBalance
 import com.example.currencyexchanger.models.User
 import com.example.currencyexchanger.models.CurrencyResponse
@@ -17,7 +18,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.math.round
 
 private const val UNEXPECTED_ERROR = "Unexpected error occurred"
 private const val INSUFFICIENT_BALANCE = "Insufficient balance"
@@ -46,12 +46,20 @@ class MainViewModel @Inject constructor(
     private val _conversionEvent = MutableLiveData<Event<String>>()
     val conversionEvent: LiveData<Event<String>> = _conversionEvent
 
+    private val _currencyBalances = MutableLiveData<List<CurrencyBalance>>()
+    val currencyBalances: LiveData<List<CurrencyBalance>>
+        get() = _currencyBalances
+
     private val user = User()
+    private val commissionCalculator = FixedPercentageCommissionCalculator()
+
 
     init {
+
         viewModelScope.launch(dispatchers.io) {
             pollRatesPeriodically()
         }
+        updateCurrencyBalances()
     }
 
     private suspend fun pollRatesPeriodically() {
@@ -66,7 +74,7 @@ class MainViewModel @Inject constructor(
         toCurrency: String
     ) {
         val fromAmount = amountStr.toDoubleOrNull()
-        if (fromAmount == null || fromAmount <= ZERO_AMOUNT || !checkSufficientBalance(fromAmount, fromCurrency)) {
+        if (fromAmount == null || fromAmount <= ZERO_AMOUNT) {
             handleInsufficientBalance()
             return
         }
@@ -81,15 +89,25 @@ class MainViewModel @Inject constructor(
             val rates = _rates.value.data?.rates ?: return@launch
             val fromRate = getRateForCurrency(fromCurrency, rates)
             val toRate = getRateForCurrency(toCurrency, rates)
+            val convertedAmount = (fromAmount * toRate) / fromRate
+            val commissionAmount = commissionCalculator.calculateCommission(fromAmount, user)
+            val totalFromAmountWithCommission = fromAmount + commissionAmount
 
-            if (!updateBalances(fromAmount, fromCurrency, toCurrency, fromRate, toRate)) {
+            if (!checkSufficientBalance(fromCurrency, totalFromAmountWithCommission)) {
+                handleInsufficientBalance()
                 return@launch
             }
 
-            val convertedAmount = round((fromAmount * fromRate * 100) / toRate) / 100
-            val commissionAmount = calculateCommission(fromAmount)
+            if (!updateBalances(
+                    fromCurrency, toCurrency, totalFromAmountWithCommission, convertedAmount)) {
+                handleInsufficientBalance()
+                return@launch
+            }
+
             val message = "You have converted $fromAmount $fromCurrency to $convertedAmount $toCurrency." +
                     " Commission Fee: $commissionAmount $fromCurrency."
+            user.incrementNumberOfOperations()
+            updateCurrencyBalances()
             _conversion.value = CurrencyEvent.ShowDialog(message)
         }
     }
@@ -110,32 +128,30 @@ class MainViewModel @Inject constructor(
         return true
     }
 
-    private fun checkSufficientBalance(fromAmount: Double, fromCurrency: String): Boolean {
-        val balance = user.getBalance(fromCurrency) ?: return false
-        return balance >= fromAmount
+    private fun checkSufficientBalance(
+        fromCurrency: String, totalFromAmountWithCommission :Double): Boolean {
+        return totalFromAmountWithCommission < user.getBalance(fromCurrency)!!
     }
 
     private fun updateBalances(
-        fromAmount: Double,
         fromCurrency: String,
         toCurrency: String,
-        fromRate: Double,
-        toRate: Double
+        totalFromAmountWithCommission: Double,
+        convertedAmount: Double
     ): Boolean {
-        if (!user.updateBalance(fromAmount, fromCurrency)) {
-            _conversion.value = CurrencyEvent.Failure(INSUFFICIENT_BALANCE)
-            return false
-        }
-        if (!user.updateBalance(-fromAmount * fromRate / toRate, toCurrency)) {
-            _conversion.value = CurrencyEvent.Failure(INSUFFICIENT_BALANCE)
-            user.updateBalance(fromAmount, fromCurrency)
-            return false
-        }
+        val userNewFromCurrencyBalance: Double?
+        = user.getBalance(fromCurrency)?.minus(totalFromAmountWithCommission)
+        val userNewToCurrencyBalance: Double? =
+            user.getBalance(toCurrency)?.plus(convertedAmount)
+        user.updateBalance(userNewFromCurrencyBalance, fromCurrency)
+        user.updateBalance(userNewToCurrencyBalance, toCurrency)
         return true
     }
 
-    private fun calculateCommission(amount: Double): Double {
-        return 0.0
+    private fun updateCurrencyBalances() {
+        viewModelScope.launch(dispatchers.main) {
+            _currencyBalances.value = user.getCurrencyBalances()
+        }
     }
 
     private fun getRateForCurrency(currency: String, rates: Rates) = when (currency) {
